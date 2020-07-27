@@ -1,5 +1,5 @@
-import logging
 import os
+import logging
 import traceback
 
 from discord.ext import commands
