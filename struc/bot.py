@@ -37,23 +37,20 @@ class Silver(commands.Bot):
 
         # load cogs
         cog_count = 0
-        self.logger.debug(f"Cogs to load: {','.join(os.listdir('./cogs'))}")
+        cogs = ["modules." + cog.replace(".py", "") for cog in os.listdir("./modules") if not cog.startswith('__')]
+        self.logger.debug(f"Modules to load: {', '.join(cogs)}")
 
-        for cog in os.listdir('./cogs'):
-            if cog.startswith('__'):
-                continue
-            else:
-                ext = "cogs." + cog.replace(".py", "")
-                try:
-                    self.logger.info(f"Loading {ext}...")
-                    self.load_extension(ext)
-                    cog_count += 1
-                except Exception as e:
-                    error = "".join(traceback.format_exception(
+        for ext in cogs:
+            try:
+                self.logger.info(f"Loading {ext}...")
+                self.load_extension(ext)
+                cog_count += 1
+            except Exception as e:
+                error = "".join(traceback.format_exception(
                         type(e), e, e.__traceback__))
-                    self.logger.exception(f'Failed to load ext {ext}.\n{error}')
+                self.logger.exception(f'Failed to load module {ext}.\n{error}')
 
-        self.logger.debug(f"Successfully loaded {cog_count} cogs.")
+        self.logger.debug(f"Successfully loaded {cog_count} modules.")
 
-        self.logger.info("Init complete.")
+        self.logger.info("Initialization complete.")
         self.logger.info('------')
