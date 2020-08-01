@@ -1,0 +1,4 @@
+motor
+discord.py
+pymongo
+python-dotenv
