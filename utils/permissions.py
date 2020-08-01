@@ -123,7 +123,7 @@ class PermissionsManager:
         if permissions:
             return self.extract_permission(cmd.qualified_name, "cmds", permissions)
         else:
-            return 0
+            return cmd.perm_level if cmd.perm_level else 0
 
     # SET METHODS
     async def set_db_perm_level(self, guild_id, field, id_resolvable, perm_level):

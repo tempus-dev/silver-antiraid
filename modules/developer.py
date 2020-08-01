@@ -6,6 +6,7 @@ from contextlib import redirect_stdout
 
 import discord
 from discord.ext import commands
+from struc.commands import CustomCommand
 
 
 class Developer(commands.Cog, name="Developer"):
@@ -75,7 +76,7 @@ class Developer(commands.Cog, name="Developer"):
         return f"""```py\n{e.text}{"^":>{e.offset}}\n{e.__class__.__name__}:
         {e}```"""
 
-    @commands.command(name="eval")
+    @commands.command(name="eval", cls=CustomCommand)
     async def _eval(self, ctx, *, body: str) -> discord.Message:
         """Evaluates code"""
         pagify = self.pagify
@@ -132,7 +133,7 @@ class Developer(commands.Cog, name="Developer"):
                 for page in pagify(text=f"{value}{ret}"):
                     await ctx.send(box(page, lang="py"))
 
-    @commands.command()
+    @commands.command(cls=CustomCommand)
     async def load(self, ctx, module: str) -> discord.Message:
         """Loads cogs/modules from the bot."""
         try:
@@ -152,7 +153,7 @@ class Developer(commands.Cog, name="Developer"):
                 "Couldn't load that module! " "Sent you the error in DMs."
             )
 
-    @commands.command()
+    @commands.command(cls=CustomCommand)
     async def unload(self, ctx, module: str) -> discord.Message:
         """Unloads cogs/modules from the bot."""
         try:
@@ -161,7 +162,7 @@ class Developer(commands.Cog, name="Developer"):
             return await ctx.send("That module either isn't loaded or doesn't exist.")
         return await ctx.send(f"Unloaded `{module}`!")
 
-    @commands.command()
+    @commands.command(cls=CustomCommand)
     async def reload(self, ctx, module: str) -> discord.Message:
         """Reloads cogs/modules from the bot."""
         try:
