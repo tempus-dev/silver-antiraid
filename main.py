@@ -6,7 +6,18 @@ from utils.env import TOKEN, MAINTAINERS
 
 
 def main():
-    bot = Silver(command_prefix=discord.ext.commands.when_mentioned_or("AG?"))
+    intents = discord.Intents(guilds=True, 
+                              members=True, 
+                              bans=True, 
+                              emojis=True, 
+                              integrations=True, 
+                              webhooks=True, 
+                              invites=True, 
+                              voice_states=True, 
+                              messages=True, 
+                              reactions=True, 
+                              typing=True)
+    bot = Silver(command_prefix=discord.ext.commands.when_mentioned_or("AG?"), intents=intents)
 
     @bot.check
     async def command_permissions(ctx):
