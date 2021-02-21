@@ -1,2 +1,4 @@
+from .cmds import CustomCommands
+
 def setup(bot):
-    pass
+    bot.add_cog(CustomCommands(bot))
