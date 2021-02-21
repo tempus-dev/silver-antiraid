@@ -5,8 +5,7 @@ import asyncio
 
 from discord.ext import commands
 
-API_BASE_URL = "http://api.staging.sfe.gg/"
-
+API_BASE_URL = "https://staging.sfe.gg/api/"
 
 class Invite:
     """This syncs the servers a member is in to the servers they're supposed to be in."""
@@ -23,9 +22,13 @@ class Invite:
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(API_BASE_URL + f"add/{guild_id}/{user_id}") as resp:
                 res = await resp.json()
+        print(res)
 
-        if res["success"] and res["code"] == 0:
+        if res["success"]:
             return {"response": res["response"]}
+
+        elif res['code'] == 0:
+            return {"response": res, "bad_token": True}
 
         elif res['code'] == 1:
             return {"link": API_BASE_URL + f"code/{res['uuid']}", "response": res["response"]}
