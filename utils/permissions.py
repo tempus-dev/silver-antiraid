@@ -17,21 +17,55 @@ class PermissionsManager:
         self.logger = bot.logger
         self.bot = bot
         self.db = bot.db
-        self.guild_cache = {}
+        self._guild_cache = {}
+
+    # CACHE-ORIENTED METHODS
+    def _cache_guild(self, guild_id, data):
+        """Sets a guild to the cache."""
+
+        # Cache guild configuration - only set if update was successful.
+        self._guild_cache[guild_id] = data
+        # Round value so it's less impactful on memory.
+        self._guild_cache[guild_id]["last_refreshed"] = round(
+            time.time())
+
+        self.bot.logger.debug(f'Cached permission data for guild "{guild_id}".')
+
+    def _get_cached_guild(self, guild_id):
+        """Returns a cached guild or none."""
+
+        if self._guild_cache.get(guild_id) and time.time() - self._guild_cache.get(guild_id).get("last_refreshed") < 600:
+            self.logger.debug(
+                f'Using cached permission data for guild "{guild_id}".')
+            return self._guild_cache.get(guild_id)
+        else:
+            return None
+
+    def _delete_cached_guild(self, guild_id):
+        """Removes a guild from the cache."""
+
+        did_delete = True if self._guild_cache.pop(
+            guild_id, None) is not None else False
+
+        if did_delete:
+            self.bot.logger.debug(
+                f'Deleted cached permission data for guild "{guild_id}".')
+
+        return did_delete
 
     # GET METHODS
     async def get_guild_config(self, guild_id):
         """Fetch the permission config of the specified guild ID."""
 
         # Check if fresh document exists in the cache.
-        cached_guild = self.get_cached_guild(guild_id)
+        cached_guild = self._get_cached_guild(guild_id)
         if cached_guild:
             return cached_guild
 
         conf = await self.db.guild_config.find_one({"_id": str(guild_id)}) or {}
 
         if conf.get("permissions"):
-            self.cache_guild(guild_id, conf.get("permissions"))
+            self._cache_guild(guild_id, conf.get("permissions"))
 
         return conf.get("permissions") if conf and conf.get("permissions") else None
 
@@ -144,7 +178,7 @@ class PermissionsManager:
         if conf.get("permissions") and conf.get("permissions").get(field) and conf.get("permissions").get(field).get(str(id_resolvable)) is not None:
             if conf.get("permissions").get(field).get(str(id_resolvable)) == perm_level:
                 # Cache the guild.
-                self.cache_guild(guild_id, conf.get("permissions"))
+                self._cache_guild(guild_id, conf.get("permissions"))
 
                 return True
 
@@ -153,7 +187,7 @@ class PermissionsManager:
             f'Permission level update for guild "{guild_id}" was unsuccessful.')
         self.bot.logger.warning(
             f'Attempt to set {field} "{id_resolvable}" to perm_level {perm_level} failed.')
-        self.delete_cached_guild(guild_id)
+        self._delete_cached_guild(guild_id)
 
         return False
 
@@ -209,37 +243,3 @@ class PermissionsManager:
             return self.logger.debug(f"[ws] Could not find obj '{guild_id}:{obj_id}'")
         else:
             return await self.set_permission(target, level)
-
-    # CACHE-ORIENTED METHODS
-    def cache_guild(self, guild_id, data):
-        """Sets a guild to the cache."""
-
-        # Cache guild configuration - only set if update was successful.
-        self.guild_cache[guild_id] = data
-        # Round value so it's less impactful on memory.
-        self.guild_cache[guild_id]["last_refreshed"] = round(
-            time.time())
-
-        self.bot.logger.debug(f'Cached permission data for guild "{guild_id}".')
-
-    def get_cached_guild(self, guild_id):
-        """Returns a cached guild or none."""
-
-        if self.guild_cache.get(guild_id) and time.time() - self.guild_cache.get(guild_id).get("last_refreshed") < 600:
-            self.logger.debug(
-                f'Using cached permission data for guild "{guild_id}".')
-            return self.guild_cache.get(guild_id)
-        else:
-            return None
-
-    def delete_cached_guild(self, guild_id):
-        """Removes a guild from the cache."""
-
-        did_delete = True if self.guild_cache.pop(
-            guild_id, None) is not None else False
-
-        if did_delete:
-            self.bot.logger.debug(
-                f'Deleted cached permission data for guild "{guild_id}".')
-
-        return did_delete

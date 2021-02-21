@@ -23,6 +23,7 @@ class AntiRaid(commands.Cog, name="Antiraid"):
 
     def __init__(self, bot):
         self.bot = bot
+        self.logger = bot.logger
         self.db = bot.db
         self.guild_cache = {}
         self.raid_cache = {}
@@ -156,7 +157,7 @@ class AntiRaid(commands.Cog, name="Antiraid"):
     @commands.group(cls=CustomGroup)
     async def antiraid(self, ctx) -> None:
         """The antiraid commands."""
-        return
+        pass
 
     @antiraid.command(cls=CustomCommand)
     async def on(self, ctx) -> None:
@@ -237,8 +238,3 @@ class AntiRaid(commands.Cog, name="Antiraid"):
             }}
         )
         print('test_event')
-
-
-def setup(bot):
-    # bot.add_cog(AntiRaid(bot))
-    pass
